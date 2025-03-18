@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # initialize arguments
-if [ "$#" -ne 2 ]; then 
+if [ "$#" -ne 2 ] 
+then
     echo "All parameters not specified correctly"
     exit 1
 fi
@@ -10,7 +11,8 @@ filesdir="$1"
 searchstr="$2"
 
 # check if filesdir is dir
-if [ ! -d "$filesdir" ]; then
+if [ ! -d "$filesdir" ]
+then
     echo "Provided filesdir is not valid dir"
     exit 1
 fi 
