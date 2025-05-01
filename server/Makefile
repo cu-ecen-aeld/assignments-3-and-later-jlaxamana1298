@@ -1,8 +1,8 @@
-CC ?= gcc
+CC = $(CROSS_COMPILE)gcc
 CFLAGS = -Wall -Werror -g
 TARGET = aesdsocket
 
-all: $(TARGET)
+all: aesdsocket
 
 $(TARGET): aesdsocket.c
 	$(CC) $(CFLAGS) -o $(TARGET) aesdsocket.c
