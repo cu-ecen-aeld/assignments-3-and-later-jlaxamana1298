@@ -46,7 +46,8 @@ struct timer_thread_data
 };
 
 
-void signal_handler(int signum) {
+void signal_handler(int signum)
+{
     if (signum == SIGINT || signum == SIGTERM)
     {
         syslog(LOG_INFO, "Signal caught");
@@ -71,7 +72,7 @@ bool check_newline(char s[], size_t size)
 void timer_thread(union sigval timer_data)
 {
     struct timer_thread_data* thread_args = timer_data.sival_ptr;
-    timer_t = rawtime;
+    time_t rawtime;
     struct tm *info;
     char buffer[80];
     
@@ -82,7 +83,7 @@ void timer_thread(union sigval timer_data)
     FILE* file = fopen(TMPFILE, "a");
     if (file == NULL)
     {
-        syslog(LOG_ERR "error openning file in timer thread");
+        syslog(LOG_ERR, "error openning file in timer thread");
         thread_args->thread_complete = true;
         thread_args->thread_complete_success = false;
         return;
@@ -177,7 +178,7 @@ void* handle_conn(void* conn_data)
             return conn_data;
         }
         
-        rc = pthread_mutex_unlock(thread_args->mutex)
+        rc = pthread_mutex_unlock(thread_args->mutex);
         if (rc != 0)
         {
             syslog(LOG_ERR, "Mutex unlock failed in handle_conn");
@@ -236,7 +237,7 @@ int main(int argc, char *argv[])
     // init variables
     int sockfd, status, opt = 1;
     struct addrinfo hints;
-    struct addrinfo* servinfo
+    struct addrinfo* servinfo;
     bool rundaemon = false;
     
     SLIST_HEAD(list_head, conn_thread) threads_head;
@@ -306,7 +307,7 @@ int main(int argc, char *argv[])
     if (listen(sockfd, 5) < 0)
     {
         syslog(LOG_ERR, "listen error");
-        exit(1)
+        exit(1);
     }
     
     struct timer_thread_data timer_data = {
@@ -373,7 +374,7 @@ int main(int argc, char *argv[])
         struct conn_thread_data data = {
             .mutex = &lock,
             .sockfd_in = sockfd_in,
-            .addr_client = addr_flient,
+            .addr_client = addr_client,
             .thread_complete = false,
             .thread_complete_success = true
         };
