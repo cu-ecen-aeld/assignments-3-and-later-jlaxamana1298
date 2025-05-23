@@ -7,6 +7,7 @@
  * @copyright Copyright (c) 2020
  *
  */
+#include <stdio.h>
 
 #ifdef __KERNEL__
 #include <linux/string.h>
@@ -32,6 +33,20 @@ struct aesd_buffer_entry *aesd_circular_buffer_find_entry_offset_for_fpos(struct
     /**
     * TODO: implement per description
     */
+    int curr_offset = 0;
+    for (int i = buffer->out_offs; i < AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED + buffer->out_offs; i++)
+    {
+        int curr_index = i % AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED;
+        
+        if ((char_offset - curr_offset) < buffer->entry[curr_index].size)
+        {
+            *entry_offset_byte_rtn = char_offset - curr_offset;
+            return &buffer->entry[curr_index];
+        }
+        
+        curr_offset += buffer->entry[curr_index.size;
+    }
+    
     return NULL;
 }
 
@@ -47,6 +62,19 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
     /**
     * TODO: implement per description
     */
+    buffer->entry[buffer->in_offs] = *add_entry;
+    
+    if (buffer->full && (buffer->in_offs == buffer->out_offs))
+    {
+        buffer->out_offs++;
+    }
+    
+    buffer->in_offs++;
+    if (buffer->in_offs == AESD_MAX_WRITE_OPERATIONS_SUPPORTED)
+    {
+        buffer->full = true;
+        buffer->in_offs = 0;
+    }
 }
 
 /**
