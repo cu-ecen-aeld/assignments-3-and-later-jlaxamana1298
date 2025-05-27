@@ -7,8 +7,6 @@
  * @copyright Copyright (c) 2020
  *
  */
-#include <stdio.h>
-
 #ifdef __KERNEL__
 #include <linux/string.h>
 #else
@@ -44,7 +42,7 @@ struct aesd_buffer_entry *aesd_circular_buffer_find_entry_offset_for_fpos(struct
             return &buffer->entry[curr_index];
         }
         
-        curr_offset += buffer->entry[curr_index.size;
+        curr_offset += buffer->entry[curr_index].size;
     }
     
     return NULL;
@@ -57,24 +55,28 @@ struct aesd_buffer_entry *aesd_circular_buffer_find_entry_offset_for_fpos(struct
 * Any necessary locking must be handled by the caller
 * Any memory referenced in @param add_entry must be allocated by and/or must have a lifetime managed by the caller.
 */
-void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const struct aesd_buffer_entry *add_entry)
+const char* aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const struct aesd_buffer_entry *add_entry)
 {
     /**
     * TODO: implement per description
     */
-    buffer->entry[buffer->in_offs] = *add_entry;
+    const char* retval = NULL;
     
     if (buffer->full && (buffer->in_offs == buffer->out_offs))
     {
-        buffer->out_offs++;
+        retval = buffer->entry[buffer->out_offs].buffptr;
+        buffer->out_offs = (buffer->out_offs + 1) % AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED;
     }
     
-    buffer->in_offs++;
-    if (buffer->in_offs == AESD_MAX_WRITE_OPERATIONS_SUPPORTED)
+    buffer->entry[buffer->in_offs++] = *add_entry;
+    
+    if (buffer->in_offs == AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED)
     {
         buffer->full = true;
         buffer->in_offs = 0;
     }
+    
+    return retval;
 }
 
 /**

@@ -15,7 +15,17 @@
 #include <sys/queue.h>
 
 #define MAX_LEN 1024
-#define TMPFILE "/var/tmp/aesdsocketdata"
+
+#ifndef USE_AESD_CHAR_DEVICE
+    #define USE_AESD_CHAR_DEVICE (1)
+#endif
+
+#if (USE_AESD_CHAR_DEVICE == 0)
+    #define TMPFILE "/var/tmp/aesdsocketdata"
+#else
+    #define TMPFILE "/dev/aesdchar"
+#endif
+
 
 pthread_mutex_t lock;
 volatile sig_atomic_t sig_caught = 0;
@@ -37,14 +47,14 @@ struct conn_thread
     SLIST_ENTRY(conn_thread) entries;
 };
 
-
+#if (USE_AESD_CHAR_DEVICE == 0)
 struct timer_thread_data
 {
     pthread_mutex_t* mutex;
     bool thread_complete;
     bool thread_complete_success;
 };
-
+#endif
 
 void signal_handler(int signum)
 {
@@ -68,7 +78,7 @@ bool check_newline(char s[], size_t size)
     return false;
 }
 
-
+#if (USE_AESD_CHAR_DEVICE == 0)
 void timer_thread(union sigval timer_data)
 {
     struct timer_thread_data* thread_args = timer_data.sival_ptr;
@@ -127,7 +137,7 @@ void timer_thread(union sigval timer_data)
     thread_args->thread_complete = true;
     thread_args->thread_complete_success = false;
 }
-
+#endif
 
 void* handle_conn(void* conn_data)
 {
@@ -310,6 +320,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
     
+    #if (USE_AESD_CHAR_DEVICE == 0)
     struct timer_thread_data timer_data = {
         .mutex = &lock,
         .thread_complete = false,
@@ -339,7 +350,7 @@ int main(int argc, char *argv[])
         syslog(LOG_ERR, "Error starting timer");
         exit(1);
     }
-    
+    #endif
     while (!sig_caught)
     {
         int sockfd_in;
@@ -398,12 +409,14 @@ int main(int argc, char *argv[])
         SLIST_REMOVE_HEAD(&threads_head, entries);
         free(tmp);
     }
-    
+    #if (USE_AESD_CHAR_DEVICE == 0)
     timer_delete(timer);
+    #endif
     pthread_mutex_destroy(&lock);
     close(sockfd);
     freeaddrinfo(servinfo);
-    
+    #if (USE_AESD_CHAR_DEVICE == 0)
     remove(TMPFILE);
+    #endif
     return 0;
 }
