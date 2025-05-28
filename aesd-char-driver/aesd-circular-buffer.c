@@ -32,7 +32,8 @@ struct aesd_buffer_entry *aesd_circular_buffer_find_entry_offset_for_fpos(struct
     * TODO: implement per description
     */
     int curr_offset = 0;
-    for (int i = buffer->out_offs; i < AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED + buffer->out_offs; i++)
+    int i = 0;
+    for (buffer->out_offs; i < AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED + buffer->out_offs; i++)
     {
         int curr_index = i % AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED;
         
